@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div>
+        <h1>Alexander Crisler</h1>
+        <p>Oakland, CA  •  (316) 371-9880  •  alexcrisler@gmail.com  •  
+LinkedIn: <a href="https://www.linkedin.com/in/alexander-crisler">linkedin.com/in/alexander-crisler</a>  •  GitHub: <a href="https://github.com/AlexanderCrisler">github.com/AlexanderCrisler<a/></p>
+        <h2>Professional Summary</h2>
+        <p>Senior Software Engineer with 7+ years of experience spanning cloud-native data pipeline architecture, backend systems, geospatial data processing, and quality assurance. Proven ability to lead projects end-to-end, drive significant performance improvements, and deliver reliable, scalable infrastructure on AWS. Passionate about the intersection of technology and real-world impact, with a strong interest in gaming, data systems, and developer tooling.</p>
+        <h2>Technical Skills</h2>
+        <ul>
+            <li>Languages: Python, C++, C#, SQL, Bash, YAML, JavaScript (React)</li>
+            <li>Cloud & Infrastructure: AWS (Lambda, S3, EC2, DynamoDB), Terraform, Terragrunt, Docker</li>
+            <li>Geospatial & Data: GRIB2, NetCDF, H3, FTP/API/S3 data ingestion, geospatial data standardization</li>
+            <li>Tools & Platforms: GitLab, Bitbucket, Git, Unity, OpenCV, Agile/Scrum</li>
+            <li>Practices: CI/CD pipeline design, technical documentation, code review, retrospective facilitation, employee onboarding</li>
+        </ul>
+        <h2>Professional Experience</h2>
+        <h3>Software Engineer | DTN | Aug 2021 - Apr 2026</h3>
+        <ul>
+            <li>Architected and maintained cloud-native weather data pipelines on AWS, ingesting data from global meteorological organizations via APIs, FTP, and S3, standardizing and converting outputs to GRIB2 format for internal forecast teams.</li>
+            <li>Designed and led development of a geospatial cutout service — an AWS Lambda-hosted API — enabling internal teams to request custom extracts of geospatial weather data, expanding self-service data access across the organization.</li>
+            <li>Reduced CI/CD build times by over 80% by overhauling GitLab build and deploy pipelines, introducing selective builds based on code changes and service priorities.</li>
+            <li>Led the company's migration from Bitbucket to GitLab, managing the full transition of repositories, pipelines, and developer workflows.</li>
+            <li>Built an interpolation service to further extend internal weather data tooling, improving data resolution flexibility for downstream customers.</li>
+            <li>Identified and resolved performance bottlenecks across the codebase through proactive refactoring initiatives, improving system reliability and maintainability.</li>
+            <li>Owned and maintained the team's technical documentation, ensuring up-to-date, accurate references for onboarding and ongoing development.</li>
+            <li>Onboarded new engineers and led biweekly retrospectives as part of the team's Agile/Scrum process.</li>
+            <li>Grew from adding weather parameters to existing pipelines into independently planning and delivering new platform capabilities, reflecting increasing technical ownership and seniority.</li>
+        </ul>
+        <h3>Software Engineer (Contract) | Warpspeed | Oct 2020 - Aug 2021</h3>
+        <ul>
+            <li>Contributed to development of a HoloLens mixed-reality application at an early-stage startup, implementing computer vision features using OpenCV and C# in Unity.</li>
+        </ul>
+        <h3>Student Quality Assurance Engineer | NetApp | Aug 2017 - Aug 2021</h3>
+        <ul>
+            <li>Executed tests designed to expose defects in high-performance RAID controller firmware and associated software, tracking defect reports and collaborating closely with developers to drive resolution.</li>
+            <li>Developed Python scripts to automate test steps, increasing team productivity and reducing manual effort.</li>
+            <li>Assisted in building internal web-based testing automation tools to support ongoing QA workflows.</li>
+            <li>Established and monitored Windows and Linux host environments to prepare systems for read/write I/O testing against E-Series storage arrays.</li>
+            <li>Performed routine server and array equipment setup and maintenance.</li>
+            <li>Trained and mentored newly hired student contractors, accelerating their onboarding and integration into the team.</li>
+        </ul>
+        <h2>Education</h2>
+        <h3>B.S. in Computer Science | Wichita State University</h3>
+        <p>Research: Developed a machine learning system in collaboration with the cybersecurity department to detect malicious URLs targeting COVID-19 misinformation; co-authored a paper on the findings.</p>
+        <h2>Projects & Additional Experiences</h2>
+        <h3>Game Jam Participant and Team Lead</h3>
+        <p>Regularly participates in competitive game jams, leading small teams through rapid game design and development cycles under tight time constraints.</p>
+        <h2>Interests</h2>
+        <p>Marathon running • Recreational soccer • Home cooking & baking • Reading • Gaming & game development</p>
+    </div>
+{% endblock content %}
