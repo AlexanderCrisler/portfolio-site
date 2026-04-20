@@ -1,0 +1,4 @@
+# Terraform
+infra/.terraform*
+infra/*.tfstate*
+infra/*.tfvars*

@@ -1,5 +1,0 @@
-aws_region   = "us-west-1"
-project_name = "portfolio"
-domain_name  = "alexandercrisler.com"
-app_port     = 8000               # Default FastAPI port — change if Dockerfile uses another
-github_repo  = "alexandercrisler/portfolio"          # GitHub owner/repo

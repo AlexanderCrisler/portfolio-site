@@ -18,11 +18,6 @@ resource "aws_instance" "portfolio" {
   vpc_security_group_ids = [aws_security_group.portfolio.id]
   iam_instance_profile   = aws_iam_instance_profile.portfolio.name
 
-  root_block_device {
-    volume_type = "gp3"
-    volume_size = 20
-  }
-
   user_data = <<-USERDATA
     #!/bin/bash
     set -e
@@ -38,9 +33,49 @@ resource "aws_instance" "portfolio" {
     systemctl enable amazon-ssm-agent
     systemctl start amazon-ssm-agent
 
-    # Write a systemd service that pulls the latest image from ECR and runs it.
-    # Your CI/CD pipeline pushes a new image; this service restarts on reboot
-    # and can be triggered manually via: systemctl restart portfolio
+    # Data directory for SQLite (mounted into the container at /data)
+    mkdir -p /home/ec2-user/data
+    chown ec2-user:ec2-user /home/ec2-user/data
+
+    # Daily SQLite backup to S3 at 2am
+    dnf install -y cronie
+    systemctl enable crond
+    systemctl start crond
+    echo "0 2 * * * ec2-user aws s3 cp /home/ec2-user/data/portfolio.db s3://${aws_s3_bucket.backups.bucket}/backups/portfolio-\$(date +\%Y\%m\%d).db" \
+      > /etc/cron.d/portfolio-backup
+    chmod 644 /etc/cron.d/portfolio-backup
+
+    # ── Portfolio app ─────────────────────────────────────────────────────────
+    # Write a startup script that pulls and runs the app container.
+    # On first boot this may fail if no image has been pushed yet — that's fine,
+    # the GitHub Actions pipeline will start the container on the first deploy.
+    cat > /usr/local/bin/start-portfolio.sh << 'SCRIPT'
+    #!/bin/bash
+    aws ecr get-login-password --region ${var.aws_region} \
+      | docker login --username AWS --password-stdin ${aws_ecr_repository.portfolio.repository_url}
+
+    # Pull latest — exit gracefully if the image doesn't exist yet
+    docker pull ${aws_ecr_repository.portfolio.repository_url}:latest || {
+      echo "No image in ECR yet — the container will start on the first deploy."
+      exit 0
+    }
+
+    # Stop and remove any existing container
+    docker stop portfolio-app 2>/dev/null || true
+    docker rm   portfolio-app 2>/dev/null || true
+
+    docker run -d \
+      --name portfolio-app \
+      --restart unless-stopped \
+      -p ${var.app_port}:${var.app_port} \
+      -e PORT=${var.app_port} \
+      -v /home/ec2-user/data:/data \
+      ${aws_ecr_repository.portfolio.repository_url}:latest
+    SCRIPT
+
+    chmod +x /usr/local/bin/start-portfolio.sh
+
+    # Systemd service — runs the startup script on every boot
     cat > /etc/systemd/system/portfolio.service << 'SERVICE'
     [Unit]
     Description=Portfolio FastAPI app
@@ -48,23 +83,9 @@ resource "aws_instance" "portfolio" {
     Requires=docker.service
 
     [Service]
-    User=ec2-user
-    Restart=always
-    RestartSec=5
-
-    # Log in to ECR, pull latest, run
-    ExecStartPre=/bin/bash -c 'aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${aws_ecr_repository.portfolio.repository_url}'
-    ExecStartPre=/usr/bin/docker pull ${aws_ecr_repository.portfolio.repository_url}:latest
-    ExecStartPre=-/usr/bin/docker stop portfolio-app
-    ExecStartPre=-/usr/bin/docker rm portfolio-app
-    ExecStart=/usr/bin/docker run --name portfolio-app \
-      --rm \
-      -p ${var.app_port}:${var.app_port} \
-      -e PORT=${var.app_port} \
-      -v /home/ec2-user/data:/data \
-      ${aws_ecr_repository.portfolio.repository_url}:latest
-
-    ExecStop=/usr/bin/docker stop portfolio-app
+    Type=oneshot
+    RemainAfterExit=yes
+    ExecStart=/usr/local/bin/start-portfolio.sh
 
     [Install]
     WantedBy=multi-user.target
@@ -72,15 +93,7 @@ resource "aws_instance" "portfolio" {
 
     systemctl daemon-reload
     systemctl enable portfolio
-
-    # Daily SQLite backup to S3 at 2am
-    echo "0 2 * * * ec2-user aws s3 cp /home/ec2-user/data/portfolio.db s3://${aws_s3_bucket.backups.bucket}/backups/portfolio-\$(date +\%Y\%m\%d).db" \
-      > /etc/cron.d/portfolio-backup
-    chmod 644 /etc/cron.d/portfolio-backup
-
-    # Data directory for SQLite (mounted into the container at /data)
-    mkdir -p /home/ec2-user/data
-    chown ec2-user:ec2-user /home/ec2-user/data
+    systemctl start portfolio
   USERDATA
 
   tags = { Name = "${var.project_name}-server" }

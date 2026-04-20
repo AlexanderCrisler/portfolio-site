@@ -8,20 +8,26 @@
 2. Trigger a restart on the server: `systemctl restart portfolio`
 3. The systemd service pulls the new image from ECR and starts it
 
+## Prerequisites
+
+- Session Manager
+  - https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-debian-and-ubuntu.html
+  - To uninstall in the future: `sudo dpkg -r session-manager-plugin`
+
 ## First deploy (after tofu apply)
 
 ```bash
 # 1. Authenticate Docker to ECR
-aws ecr get-login-password --region us-east-1 \
+aws ecr get-login-password --region us-west-1 \
   | docker login --username AWS --password-stdin $(tofu output -raw ecr_repository_url)
 
 # 2. Build and push your image
 docker build --platform linux/arm64 -t portfolio .
-docker tag portfolio:latest $(tofu output -raw ecr_repository_url):latest
-docker push $(tofu output -raw ecr_repository_url):latest
+docker tag portfolio:latest $(tofu output -state=infra/terraform.tfstate -raw ecr_repository_url):latest
+docker push $(tofu output -state=infra/terraform.tfstate -raw ecr_repository_url):latest
 
 # 3. Open a session on the server and start the service
-aws ssm start-session --target $(tofu output -raw server_instance_id)
+aws ssm start-session --target $(tofu output -state=infra/terraform.tfstate -raw server_instance_id)
 # Inside the session:
 sudo systemctl start portfolio
 ```
