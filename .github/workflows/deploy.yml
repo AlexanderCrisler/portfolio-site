@@ -35,17 +35,19 @@ jobs:
           push: true
 
       - name: Restart app on EC2
+        env:
+          ECR_URL: ${{steps.ecr-login.outputs.registry}}/${{ secrets.ECR_REPOSITORY}}
         run: |
           COMMAND_ID=$(aws ssm send-command \
             --region ${{ secrets.AWS_REGION }} \
             --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
-              "aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_URL }}",
-              "docker pull ${{ secrets.ECR_URL }}:latest",
+              "aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ecr-login.outputs.regsitry }}",
+              "docker pull ${{ env.ECR_URL }}:latest",
               "docker stop portfolio-app || true",
               "docker rm portfolio-app || true",
-              "docker run -d --name portfolio-app --restart unless-stopped -p ${{ secrets.APP_PORT }}:${{ secrets.APP_PORT }} -v /home/ec2-user/data:/data ${{ secrets.ECR_URL }}:latest"
+              "docker run -d --name portfolio-app --restart unless-stopped -p ${{ secrets.APP_PORT }}:${{ secrets.APP_PORT }} -v /home/ec2-user/data:/data ${{ env.ECR_URL }}:latest"
             ]' \
             --query "Command.CommandId" \
             --output text)

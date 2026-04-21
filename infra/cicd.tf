@@ -68,16 +68,15 @@ resource "aws_iam_role_policy" "github_actions" {
         Resource = aws_ecr_repository.portfolio.arn
       },
       # SSM: trigger a restart on the EC2 instance after pushing
+          # "arn:aws:ssm:${var.aws_region}::document/AWS-RunShellScript",
+          # aws_instance.portfolio.arn
       {
         Effect   = "Allow"
         Action   = [
           "ssm:SendCommand",
           "ssm:GetCommandInvocation"
         ]
-        Resource = [
-          "arn:aws:ssm:${var.aws_region}::document/AWS-RunShellScript",
-          aws_instance.portfolio.arn
-        ]
+        Resource = ["*"]
       }
     ]
   })
