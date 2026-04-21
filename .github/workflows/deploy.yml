@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 permissions:
-  id-token: write   # Required for OIDC token request
+  id-token: write # Required for OIDC token request
   contents: read
 
 jobs:
@@ -24,12 +24,15 @@ jobs:
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build and push image
-        env:
-          ECR_URL: ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
-        run: |
-          docker build --platform linux/arm64 -t $ECR_URL:latest .
-          docker push $ECR_URL:latest
+        uses: docker/build-push-action@v5
+        with:
+          platforms: linux/arm64
+          tags: ${{ steps.ecr-login.outputs.registry }}/${{ secretes.ECR_REPOSITORY}}
+          push: true
 
       - name: Restart app on EC2
         run: |
