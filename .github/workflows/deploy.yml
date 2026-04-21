@@ -31,7 +31,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           platforms: linux/arm64
-          tags: ${{ steps.ecr-login.outputs.registry }}/${{ secretes.ECR_REPOSITORY}}
+          tags: ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY}}
           push: true
 
       - name: Restart app on EC2
