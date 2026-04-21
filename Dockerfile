@@ -2,7 +2,7 @@ FROM public.ecr.aws/docker/library/python:3.13
 WORKDIR /app
 
 # Install uv
-RUN apt-get update && get install -y curl && \
+RUN apt-get update && apt-get install -y curl && \
     curl -LsSf https://astral.sh/uv/install.sh | sh
 
 COPY source/requirements.txt .
