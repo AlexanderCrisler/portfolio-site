@@ -2,7 +2,7 @@ FROM public.ecr.aws/docker/library/python:3.13
 WORKDIR /app
 
 # Install uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+RUN pip install uv
 
 COPY source/requirements.txt .
 RUN $HOME/.local/bin/uv pip install --system -r requirements.txt
